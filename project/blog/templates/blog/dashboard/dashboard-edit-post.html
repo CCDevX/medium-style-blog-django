@@ -1,0 +1,301 @@
+{% extends "blog/authenticated.html" %}
+{% load static %}
+
+{% block link-style %}
+<!-- Select2 CSS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <!-- En-tête -->
+            <div class="mb-5">
+                <a href="{% url 'blog-dashboard' %}" class="text-secondary text-decoration-none small mb-3 d-inline-block">
+                    ← Retour au dashboard
+                </a>
+                <h1 class="display-5 fw-bold mb-2">Modifier l'article</h1>
+                <p class="text-secondary fs-5">Apportez des modifications à votre article</p>
+
+                <!-- Infos article -->
+                <div class="d-flex gap-4 text-secondary small mt-3">
+                    <span>Créé le {{ post.created_at|date:"d M Y à H:i" }}</span>
+                    {% if post.updated_at != post.created_at %}
+                    <span>Dernière modification le {{ post.updated_at|date:"d M Y à H:i" }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Formulaire -->
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                <!-- Champ Titre -->
+                <div class="mb-4">
+                    <label for="id_title" class="form-label fw-medium text-dark">
+                        Titre
+                    </label>
+                    <input
+                        type="text"
+                        name="title"
+                        id="id_title"
+                        class="form-control form-control-lg {% if form.title.errors %}is-invalid{% endif %}"
+                        placeholder="Titre de votre article"
+                        value="{{ form.title.value|default:'' }}"
+                    >
+                    {% if form.title.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.title.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Champ Contenu avec CKEditor -->
+                <div class="mb-4">
+                    <label for="id_content" class="form-label fw-medium text-dark">
+                        Contenu
+                    </label>
+                    <div id="editor" class="{% if form.content.errors %}border border-danger rounded{% endif %}"></div>
+                    <textarea
+                        name="content"
+                        id="id_content"
+                        style="display: none;"
+                    >{{ form.content.value|default:'' }}</textarea>
+                    {% if form.content.errors %}
+                        <div class="text-danger small mt-2">
+                            {% for error in form.content.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Champ Image -->
+                <div class="mb-4">
+                    <label for="id_image" class="form-label fw-medium text-dark">
+                        Illustration
+                    </label>
+
+                    <!-- Image actuelle -->
+                    {% if post.image %}
+                    <div class="mb-3">
+                        <p class="text-secondary small mb-2">Image actuelle :</p>
+                        <img src="{{ post.image.url }}" class="img-fluid rounded border" style="max-height: 300px;" alt="{{ post.title }}">
+                    </div>
+                    {% endif %}
+
+                    <input
+                        type="file"
+                        name="image"
+                        id="id_image"
+                        class="form-control form-control-lg {% if form.image.errors %}is-invalid{% endif %}"
+                        accept="image/*"
+                    >
+                    <div class="form-text text-secondary small">
+                        {% if post.image %}
+                        Sélectionnez une nouvelle image pour remplacer l'actuelle
+                        {% else %}
+                        Format recommandé : 1200x630px - JPG, PNG ou WebP
+                        {% endif %}
+                    </div>
+                    {% if form.image.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.image.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Preview de la nouvelle image -->
+                    <div id="imagePreview" class="mt-3" style="display: none;">
+                        <p class="text-secondary small mb-2">Nouvelle image :</p>
+                        <img id="previewImg" class="img-fluid rounded border" style="max-height: 300px;" alt="Aperçu">
+                    </div>
+                </div>
+
+                <!-- Champ Catégorie -->
+                <div class="mb-4">
+                    <label for="id_categories" class="form-label fw-medium text-dark">
+                        Catégorie
+                    </label>
+                    <select
+                        name="categories"
+                        id="id_categories"
+                        class="form-select form-select-lg {% if form.categories.errors %}is-invalid{% endif %}"
+                    >
+                        <option value="">Sélectionnez une catégorie</option>
+                        {% for value, label in form.categories.field.choices %}
+                            {% if value %}
+                                <option value="{{ value }}" {% if form.categories.value == value %}selected{% endif %}>{{ label }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    {% if form.categories.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.categories.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Champ Tags -->
+                <div class="mb-4">
+                    <label for="id_tags" class="form-label fw-medium text-dark">
+                        Tags
+                    </label>
+                    <select
+                        name="tags"
+                        id="id_tags"
+                        class="form-select form-select-lg"
+                        multiple
+                    >
+                        {% for value, label in form.tags.field.choices %}
+                            {% if value %}
+                                <option value="{{ value }}" {% if value in form.tags.value %}selected{% endif %}>{{ label }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <div class="form-text text-secondary small">
+                        Tapez pour rechercher et sélectionnez plusieurs tags
+                    </div>
+                    {% if form.tags.errors %}
+                        <div class="text-danger small mt-2">
+                            {% for error in form.tags.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Champ Publier -->
+                <div class="mb-5">
+                    <div class="form-check">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            name="is_published"
+                            id="id_is_published"
+                            {% if form.is_published.value %}checked{% endif %}
+                        >
+                        <label class="form-check-label fw-medium" for="id_is_published">
+                            Publier l'article immédiatement
+                        </label>
+                        <div class="form-text text-secondary small">
+                            Si décoché, l'article sera enregistré comme brouillon
+                        </div>
+                    </div>
+                    {% if form.is_published.errors %}
+                        <div class="text-danger small mt-2">
+                            {% for error in form.is_published.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Erreurs générales -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger mb-4">
+                        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Boutons d'action -->
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-dark btn-lg px-5">
+                            Enregistrer les modifications
+                        </button>
+                        <a href="{% url 'blog-dashboard' %}" class="btn btn-outline-secondary btn-lg">
+                            Annuler
+                        </a>
+                    </div>
+                    <a href="{% url 'blog-dashboard-view-post' post.id %}" class="text-secondary text-decoration-none small">
+                        Voir l'article →
+                    </a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<!-- jQuery (nécessaire pour Select2) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- Select2 JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+<!-- CKEditor 5 -->
+<script src="https://cdn.ckeditor.com/ckeditor5/40.0.0/classic/ckeditor.js"></script>
+
+<style>
+    .ck-editor__editable_inline {
+        min-height: 300px;
+    }
+</style>
+
+<script>
+    let editorInstance;
+
+    $(document).ready(function() {
+        // Select2 pour les tags
+        $('#id_tags').select2({
+            placeholder: 'Sélectionnez des tags',
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Preview de la nouvelle image
+        $('#id_image').on('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    $('#previewImg').attr('src', e.target.result);
+                    $('#imagePreview').fadeIn();
+                }
+                reader.readAsDataURL(file);
+            } else {
+                $('#imagePreview').fadeOut();
+            }
+        });
+
+        // Initialiser CKEditor
+        ClassicEditor
+            .create(document.querySelector('#editor'), {
+                toolbar: {
+                    items: [
+                        'heading', '|',
+                        'bold', 'italic', 'link', '|',
+                        'bulletedList', 'numberedList', '|',
+                        'blockQuote', 'insertTable', '|',
+                        'undo', 'redo'
+                    ]
+                },
+                language: 'fr'
+            })
+            .then(editor => {
+                editorInstance = editor;
+
+                // Charger le contenu initial
+                const initialContent = $('#id_content').val();
+                if (initialContent) {
+                    editor.setData(initialContent);
+                }
+            })
+            .catch(error => {
+                console.error(error);
+            });
+
+        // Synchroniser CKEditor avec le textarea avant soumission
+        $('form').on('submit', function() {
+            if (editorInstance) {
+                $('#id_content').val(editorInstance.getData());
+            }
+        });
+    });
+</script>
+{% endblock %}

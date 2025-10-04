@@ -1,0 +1,195 @@
+{% extends "blog/authenticated.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <!-- En-tête -->
+            <div class="mb-5">
+                <a href="{% url 'blog-dashboard' %}" class="text-secondary text-decoration-none small mb-3 d-inline-block">
+                    ← Retour au dashboard
+                </a>
+                <h1 class="display-5 fw-bold mb-2">Modifier mon profil</h1>
+                <p class="text-secondary fs-5">Mettez à jour vos informations personnelles</p>
+            </div>
+
+            <!-- Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Formulaire -->
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <!-- Champ Prénom -->
+                <div class="mb-4">
+                    <label for="id_first_name" class="form-label fw-medium text-dark">
+                        Prénom
+                    </label>
+                    <input
+                        type="text"
+                        name="first_name"
+                        id="id_first_name"
+                        class="form-control form-control-lg {% if form.first_name.errors %}is-invalid{% endif %}"
+                        placeholder="Votre prénom"
+                        value="{{ form.first_name.value|default:'' }}"
+                    >
+                    {% if form.first_name.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.first_name.errors %}
+                                {{ error }}{% if not forloop.last %}<br>{% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Champ Nom -->
+                <div class="mb-4">
+                    <label for="id_last_name" class="form-label fw-medium text-dark">
+                        Nom
+                    </label>
+                    <input
+                        type="text"
+                        name="last_name"
+                        id="id_last_name"
+                        class="form-control form-control-lg {% if form.last_name.errors %}is-invalid{% endif %}"
+                        placeholder="Votre nom"
+                        value="{{ form.last_name.value|default:'' }}"
+                    >
+                    {% if form.last_name.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.last_name.errors %}
+                                {{ error }}{% if not forloop.last %}<br>{% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Champ Email -->
+                <div class="mb-4">
+                    <label for="id_email" class="form-label fw-medium text-dark">
+                        Email
+                    </label>
+                    <input
+                        type="email"
+                        name="email"
+                        id="id_email"
+                        class="form-control form-control-lg {% if form.email.errors %}is-invalid{% endif %}"
+                        placeholder="votre@email.com"
+                        value="{{ form.email.value|default:'' }}"
+                    >
+                    {% if form.email.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.email.errors %}
+                                {{ error }}{% if not forloop.last %}<br>{% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Champ Biographie avec CKEditor -->
+                <div class="mb-5">
+                    <label for="id_description" class="form-label fw-medium text-dark">
+                        Biographie
+                    </label>
+                    <div id="editor" class="{% if form.description.errors %}border border-danger rounded{% endif %}"></div>
+                    <textarea
+                        name="description"
+                        id="id_description"
+                        style="display: none;"
+                    >{{ form.description.value|default:'' }}</textarea>
+                    <div class="form-text text-secondary small">
+                        Présentez-vous à vos lecteurs
+                    </div>
+                    {% if form.description.errors %}
+                        <div class="text-danger small mt-2">
+                            {% for error in form.description.errors %}
+                                {{ error }}{% if not forloop.last %}<br>{% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Erreurs générales -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger mb-4">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}{% if not forloop.last %}<br>{% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Boutons d'action -->
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn btn-dark btn-lg px-5">
+                        Enregistrer les modifications
+                    </button>
+                    <a href="{% url 'blog-dashboard' %}" class="btn btn-outline-secondary btn-lg">
+                        Annuler
+                    </a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<!-- CKEditor 5 -->
+<script src="https://cdn.ckeditor.com/ckeditor5/40.0.0/classic/ckeditor.js"></script>
+
+<style>
+    .ck-editor__editable_inline {
+        min-height: 200px;
+    }
+</style>
+
+<script>
+    let editorInstance;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser CKEditor
+        ClassicEditor
+            .create(document.querySelector('#editor'), {
+                toolbar: {
+                    items: [
+                        'heading', '|',
+                        'bold', 'italic', 'link', '|',
+                        'bulletedList', 'numberedList', '|',
+                        'blockQuote', '|',
+                        'undo', 'redo'
+                    ]
+                },
+                language: 'fr'
+            })
+            .then(editor => {
+                editorInstance = editor;
+
+                // Charger le contenu initial
+                const initialContent = document.querySelector('#id_description').value;
+                if (initialContent) {
+                    editor.setData(initialContent);
+                }
+            })
+            .catch(error => {
+                console.error(error);
+            });
+
+        // Synchroniser CKEditor avec le textarea avant soumission
+        document.querySelector('form').addEventListener('submit', function() {
+            if (editorInstance) {
+                document.querySelector('#id_description').value = editorInstance.getData();
+            }
+        });
+    });
+</script>
+{% endblock %}

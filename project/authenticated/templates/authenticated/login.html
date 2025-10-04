@@ -1,0 +1,90 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-xl-5">
+
+            <!-- En-tête -->
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold mb-3">Connexion</h1>
+                <p class="text-secondary fs-5">
+                    Connectez-vous pour gérer vos articles
+                </p>
+            </div>
+
+            <!-- Messages d'erreur ou de succès -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Formulaire -->
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <!-- Erreurs générales du formulaire (identifiants incorrects) -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger mb-4">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}{% if not forloop.last %}<br>{% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Champ Nom d'utilisateur -->
+                <div class="mb-4">
+                    <label for="{{ form.username.id_for_label }}" class="form-label fw-medium text-dark">
+                        {{ form.username.label }}
+                    </label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.username.errors %}
+                                {{ error }}{% if not forloop.last %}<br>{% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Champ Mot de passe -->
+                <div class="mb-4">
+                    <label for="{{ form.password.id_for_label }}" class="form-label fw-medium text-dark">
+                        {{ form.password.label }}
+                    </label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.password.errors %}
+                                {{ error }}{% if not forloop.last %}<br>{% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Bouton de connexion -->
+                <div class="d-grid mt-5">
+                    <button type="submit" class="btn btn-dark btn-lg">
+                        Se connecter
+                    </button>
+                </div>
+
+                <!-- Lien vers inscription -->
+                <div class="text-center mt-4">
+                    <p class="text-secondary small">
+                        Vous n'avez pas encore de compte ?
+                        <a href="{% url 'authenticated-register' %}" class="text-dark fw-medium text-decoration-none">
+                            S'inscrire
+                        </a>
+                    </p>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

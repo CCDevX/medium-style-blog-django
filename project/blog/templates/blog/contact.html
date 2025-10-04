@@ -1,0 +1,163 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-xl-5">
+
+            <!-- En-tête -->
+            <div class="text-center mb-5">
+                <h1 class="display-5 fw-bold mb-3">Contact</h1>
+                <p class="text-secondary fs-5">
+                    Nous serions ravis d'avoir de vos nouvelles
+                </p>
+            </div>
+
+            <!-- Messages de succès -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} mb-4">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Formulaire -->
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                <!-- Champ Civilité -->
+                <div class="mb-4">
+                    <label for="id_civility" class="form-label fw-medium text-dark">
+                        Civilité
+                    </label>
+                    <select
+                        name="civility"
+                        id="id_civility"
+                        class="form-select form-select-lg {% if form.civility.errors %}is-invalid{% endif %}"
+                    >
+                        <option value="">Sélectionnez</option>
+                        {% for value, label in form.civility.field.choices %}
+                            <option value="{{ value }}" {% if form.civility.value == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    {% if form.civility.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.civility.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Champ Nom -->
+                <div class="mb-4">
+                    <label for="id_name" class="form-label fw-medium text-dark">
+                        Nom
+                    </label>
+                    <input
+                        type="text"
+                        name="name"
+                        id="id_name"
+                        class="form-control form-control-lg {% if form.name.errors %}is-invalid{% endif %}"
+                        placeholder="Votre nom"
+                        value="{{ form.name.value|default:'' }}"
+                    >
+                    {% if form.name.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.name.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Champ Email -->
+                <div class="mb-4">
+                    <label for="id_email" class="form-label fw-medium text-dark">
+                        Email
+                    </label>
+                    <input
+                        type="email"
+                        name="email"
+                        id="id_email"
+                        class="form-control form-control-lg {% if form.email.errors %}is-invalid{% endif %}"
+                        placeholder="votre@email.com"
+                        value="{{ form.email.value|default:'' }}"
+                    >
+                    {% if form.email.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.email.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Champ Objet -->
+                <div class="mb-4">
+                    <label for="id_subject" class="form-label fw-medium text-dark">
+                        Objet
+                    </label>
+                    <input
+                        type="text"
+                        name="subject"
+                        id="id_subject"
+                        class="form-control form-control-lg {% if form.subject.errors %}is-invalid{% endif %}"
+                        placeholder="Objet de votre message"
+                        value="{{ form.subject.value|default:'' }}"
+                    >
+                    {% if form.subject.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.subject.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Champ Message -->
+                <div class="mb-4">
+                    <label for="id_message" class="form-label fw-medium text-dark">
+                        Message
+                    </label>
+                    <textarea
+                        name="message"
+                        id="id_message"
+                        class="form-control form-control-lg {% if form.message.errors %}is-invalid{% endif %}"
+                        rows="6"
+                        placeholder="Votre message..."
+                    >{{ form.message.value|default:'' }}</textarea>
+                    {% if form.message.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.message.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Champ Fichier -->
+                <div class="mb-4">
+                    <label for="id_file" class="form-label fw-medium text-dark">
+                        Pièce jointe <span class="text-secondary small">(optionnel)</span>
+                    </label>
+                    <input
+                        type="file"
+                        name="file"
+                        id="id_file"
+                        class="form-control form-control-lg"
+                    >
+                    <div class="form-text text-secondary small">Formats acceptés : PDF, DOC, DOCX, JPG, PNG (max 5 Mo)</div>
+                </div>
+
+                <!-- Erreurs générales du formulaire -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger mb-4">
+                        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Bouton d'envoi -->
+                <div class="d-grid mt-5">
+                    <button type="submit" class="btn btn-outline-dark btn-lg">
+                        Envoyer
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

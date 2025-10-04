@@ -1,0 +1,67 @@
+<header class="border-bottom bg-white sticky-top">
+  <nav class="navbar navbar-expand-lg navbar-light py-3">
+    <div class="container">
+        <a
+        class="navbar-brand fs-3 fw-semibold text-dark"
+        href="{% url 'blog-home' %}"
+      >
+        Plume
+      </a>
+      <button
+        class="navbar-toggler border-0"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto align-items-center">
+          <li class="nav-item">
+<a
+              class="nav-link text-secondary small {% if request.resolver_match.url_name == 'blog-home' %}text-dark fw-medium{% endif %}"
+              href="{% url 'blog-home' %}"
+            >
+              Accueil
+            </a>
+          </li>
+          <li class="nav-item">
+<a
+              class="nav-link text-secondary small {% if request.resolver_match.url_name == 'blog-post' %}text-dark fw-medium{% endif %}"
+              href="{% url 'blog-post' %}"
+            >
+              Articles
+            </a>
+          </li>
+          <li class="nav-item">
+<a
+              class="nav-link text-secondary small {% if request.resolver_match.url_name == 'blog-contact' %}text-dark fw-medium{% endif %}"
+              href="{% url 'blog-contact' %}"
+            >
+              Contact
+            </a>
+          </li>
+
+          <!-- Dashboard toujours affiché -->
+          <li class="nav-item">
+<a
+              class="nav-link text-secondary small {% if request.resolver_match.url_name == 'blog-dashboard' %}text-dark fw-medium{% endif %}"
+              href="{% url 'blog-dashboard' %}"
+            >
+              Dashboard
+            </a>
+          </li>
+
+                    <li class="nav-item ms-lg-3">
+            <a href="{% url 'authenticated-logout' %}" class="btn btn-dark btn-sm px-3">
+              Déconnexion
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>

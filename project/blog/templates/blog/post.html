@@ -1,0 +1,61 @@
+{% extends "blog/base.html" %}
+
+{% block content %}
+<div class="container my-5">
+
+    <!-- Titre de la page -->
+    <div class="mb-5 pb-4 border-bottom">
+        <h1 class="display-5 fw-bold mb-2">Tous les articles</h1>
+        <p class="text-secondary fs-5">Découvrez toutes nos histoires et réflexions</p>
+    </div>
+
+    <!-- Pagination -->
+    {% include "blog/components/paginator.html" with data=posts %}
+
+    <div class="row g-4">
+        {% for post in posts %}
+        <div class="col-md-6 col-lg-4">
+            <article class="card border-0 h-100">
+                <a href="{% url 'blog-single-post' post.id %}" class="text-decoration-none">
+                    {% if post.image %}
+                        <img src="{{ post.image.url }}" class="card-img-top rounded" style="object-fit: cover; height: 250px;" alt="{{ post.title }}">
+                    {% else %}
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 250px;">
+                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                <span class="fw-bold" style="font-size: 2rem;">{{ post.author.username|first|upper }}</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </a>
+                <div class="card-body px-0">
+                    <div class="mb-2">
+                        <span class="badge bg-light text-dark border small px-2 py-1">{{ post.category }}</span>
+                    </div>
+                    <h5 class="card-title fw-bold lh-sm mb-3">
+                        <a href="{% url 'blog-single-post' post.id %}" class="text-dark text-decoration-none">
+                            {{ post.title }}
+                        </a>
+                    </h5>
+                    <p class="card-text text-secondary small mb-3">
+                        {{ post.content|truncatewords:20|striptags }}
+                    </p>
+                    <a href="{% url 'blog-single-post' post.id %}" class="text-dark text-decoration-none small fw-medium mb-3 d-inline-block">
+                        Lire l'article →
+                    </a>
+                    <div class="d-flex align-items-center mt-auto">
+                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                            <span class="fw-bold" style="font-size: 0.7rem;">{{ post.author.username|first|upper }}</span>
+                        </div>
+                        <div>
+                            <div class="text-dark small fw-medium">{{ post.author }}</div>
+                            <div class="text-secondary" style="font-size: 0.75rem;">{{ post.created_at|date:"d M Y" }}</div>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}
