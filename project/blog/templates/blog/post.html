@@ -18,7 +18,7 @@
             <article class="card border-0 h-100">
                 <a href="{% url 'blog-single-post' post.id %}" class="text-decoration-none">
                     {% if post.image %}
-                        <img src="{{ post.image.url }}" class="card-img-top rounded" style="object-fit: cover; height: 250px;" alt="{{ post.title }}">
+                        <img src="{{ post.image }}" class="card-img-top rounded" style="object-fit: cover; height: 250px;" alt="{{ post.title }}">
                     {% else %}
                         <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 250px;">
                             <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">

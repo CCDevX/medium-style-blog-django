@@ -32,7 +32,7 @@
             <!-- Image principale -->
             <figure class="mb-5">
                 {% if post.image %}
-                    <img src="{{ post.image.url }}" class="img-fluid w-100 rounded" style="object-fit: cover; max-height: 500px;" alt="{{ post.title }}">
+                    <img src="{{ post.image }}" class="img-fluid w-100 rounded" style="object-fit: cover; max-height: 500px;" alt="{{ post.title }}">
                 {% else %}
                     <div class="bg-light rounded w-100 d-flex align-items-center justify-content-center" style="height: 500px;">
                         <div class="text-center">
