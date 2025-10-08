@@ -138,3 +138,31 @@ MEDIA_ROOT = os.environ.get('MEDIA_ROOT', '/opt/render/project/src/media')
 # -------------------------------------------------------------------
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ==============================================================
+# MEDIA FILES - CLOUDINARY CONFIGURATION
+# ==============================================================
+
+import os
+from django.core.exceptions import ImproperlyConfigured
+
+# Vérifie la variable Cloudinary
+CLOUDINARY_URL = os.getenv('CLOUDINARY_URL')
+if not CLOUDINARY_URL:
+    raise ImproperlyConfigured(
+        "⚠️  La variable CLOUDINARY_URL est manquante. "
+        "Ajoute-la dans ton fichier .env et dans Render → Environment."
+    )
+
+INSTALLED_APPS += [
+    'cloudinary',
+    'cloudinary_storage',
+]
+
+# Utilise Cloudinary pour tous les fichiers uploadés
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# (Optionnel) Fallback local pour le dev
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
