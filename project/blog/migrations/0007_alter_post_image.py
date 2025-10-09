@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='post',
             name='image',
-            field=models.ImageField(blank=True, null=True, storage=blog.models.post.get_cloudinary_storage, upload_to='post/%Y/%m/%d'),
+            field=models.ImageField(blank=True, null=True, upload_to='post/%Y/%m/%d'),
         ),
     ]
