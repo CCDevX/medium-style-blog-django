@@ -144,12 +144,14 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # MEDIA FILES - CLOUDINARY CONFIGURATION
 # ==============================================================
 
+import os
 from django.core.exceptions import ImproperlyConfigured
 
+# Vérifie la variable Cloudinary
 CLOUDINARY_URL = os.getenv('CLOUDINARY_URL')
 if not CLOUDINARY_URL:
     raise ImproperlyConfigured(
-        "❌ La variable CLOUDINARY_URL est manquante. "
+        "⚠️  La variable CLOUDINARY_URL est manquante. "
         "Ajoute-la dans ton fichier .env et dans Render → Environment."
     )
 
@@ -158,9 +160,5 @@ INSTALLED_APPS += [
     'cloudinary_storage',
 ]
 
-# Cloudinary devient le seul backend de stockage
+# Utilise Cloudinary pour tous les fichiers uploadés
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-# Aucune écriture locale → plus de perte après redeploy
-MEDIA_ROOT = None
-MEDIA_URL = '/media/'  # juste pour compatibilité Django, jamais utilisé localement
