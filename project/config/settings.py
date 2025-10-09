@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary',
+    'cloudinary_storage',
     'django.contrib.staticfiles',
 
     # Apps
@@ -144,10 +146,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # MEDIA FILES - CLOUDINARY CONFIGURATION
 # ==============================================================
 
-import os
-from django.core.exceptions import ImproperlyConfigured
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
-# Vérifie la variable Cloudinary
 CLOUDINARY_URL = os.getenv('CLOUDINARY_URL')
 if not CLOUDINARY_URL:
     raise ImproperlyConfigured(
@@ -155,10 +157,10 @@ if not CLOUDINARY_URL:
         "Ajoute-la dans ton fichier .env et dans Render → Environment."
     )
 
-INSTALLED_APPS += [
-    'cloudinary',
-    'cloudinary_storage',
-]
+# Configuration explicite de Cloudinary
+cloudinary.config(
+    cloudinary_url=CLOUDINARY_URL
+)
 
 # Utilise Cloudinary pour tous les fichiers uploadés
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
