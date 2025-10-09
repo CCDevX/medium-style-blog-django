@@ -2,10 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from .category import Category
 from .tag import Tag
+from cloudinary_storage.storage import MediaCloudinaryStorage
 
-def get_cloudinary_storage():
-    from cloudinary_storage.storage import MediaCloudinaryStorage
-    return MediaCloudinaryStorage()
+cloudinary_storage = MediaCloudinaryStorage()
 
 class Post(models.Model):
     id = models.AutoField(primary_key=True)
@@ -15,9 +14,14 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     categories = models.ForeignKey(Category, on_delete=models.CASCADE)
     tags = models.ManyToManyField(Tag)
-    image = models.ImageField(upload_to="post/%Y/%m/%d", blank=True, null=True, storage=get_cloudinary_storage)
+    image = models.ImageField(
+        upload_to="post/%Y/%m/%d",
+        blank=True,
+        null=True,
+        storage=cloudinary_storage,  # ✅ explicitement défini ici
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.title

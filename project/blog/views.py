@@ -129,7 +129,7 @@ def dashboard_new_post(request):
 @login_required
 def dashboard_edit_post(request, id):
     post = get_object_or_404(Post, id=id)
-    old_image = post.image.path # garder l'ancienne image
+    old_image = post.image.path if post.image else None  # garder l'ancienne image
 
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES, instance=post)
