@@ -6,13 +6,14 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
 # -------------------------------------------------------------------
 # BASE CONFIGURATION
 # -------------------------------------------------------------------
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / '.env')  # charge les variables d’environnement
+load_dotenv(BASE_DIR / '.env')
 os.environ["PGCLIENTENCODING"] = "utf8"
 
 # -------------------------------------------------------------------
@@ -32,6 +33,16 @@ ALLOWED_HOSTS = os.getenv(
 ).split(',')
 
 # -------------------------------------------------------------------
+# CLOUDINARY - Configuration AVANT INSTALLED_APPS
+# -------------------------------------------------------------------
+
+CLOUDINARY_URL = os.getenv('CLOUDINARY_URL')
+if not CLOUDINARY_URL:
+    raise ImproperlyConfigured(
+        "⚠️ CLOUDINARY_URL manquante dans les variables d'environnement"
+    )
+
+# -------------------------------------------------------------------
 # APPLICATIONS
 # -------------------------------------------------------------------
 
@@ -41,9 +52,11 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'cloudinary',
-    'cloudinary_storage',
-    'django.contrib.staticfiles',
+
+    # ⚠️ ORDRE CRUCIAL POUR CLOUDINARY
+    'cloudinary_storage',        # 1. AVANT staticfiles
+    'django.contrib.staticfiles', # 2. staticfiles
+    'cloudinary',                # 3. APRÈS staticfiles
 
     # Apps
     'blog',
@@ -126,41 +139,14 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # -------------------------------------------------------------------
-# MEDIA FILES (UPLOADS)
+# MEDIA FILES - CLOUDINARY
 # -------------------------------------------------------------------
-# ✅ IMPORTANT POUR RENDER :
-# Le disk Render doit être monté sur /media
-# (dans le Dashboard Render → onglet “Disks” → Mount Path = /media)
 
-#MEDIA_URL = '/media/'
-#MEDIA_ROOT = os.environ.get('MEDIA_ROOT', '/opt/render/project/src/media')
+# ✅ Utilise Cloudinary pour TOUS les fichiers uploadés
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # -------------------------------------------------------------------
 # DEFAULT PRIMARY KEY
 # -------------------------------------------------------------------
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-
-# ==============================================================
-# MEDIA FILES - CLOUDINARY CONFIGURATION
-# ==============================================================
-
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
-
-CLOUDINARY_URL = os.getenv('CLOUDINARY_URL')
-if not CLOUDINARY_URL:
-    raise ImproperlyConfigured(
-        "⚠️  La variable CLOUDINARY_URL est manquante. "
-        "Ajoute-la dans ton fichier .env et dans Render → Environment."
-    )
-
-# Configuration explicite de Cloudinary
-cloudinary.config(
-    cloudinary_url=CLOUDINARY_URL
-)
-
-# Utilise Cloudinary pour tous les fichiers uploadés
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
