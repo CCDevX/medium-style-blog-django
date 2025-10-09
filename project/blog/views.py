@@ -104,9 +104,11 @@ def dashboard(request):
 
 @login_required
 def dashboard_view_post(request, id):
-    post = get_object_or_404(Post, id=id)
-    return render(request, 'blog/dashboard/dashboard-view-post.html', {'post':post})
-
+    try:
+        post = get_object_or_404(Post, id=id)
+        return render(request, 'blog/dashboard/dashboard-view-post.html', {'post':post})
+    except Exception as e:
+        print(e)
 
 @login_required
 def dashboard_new_post(request):
