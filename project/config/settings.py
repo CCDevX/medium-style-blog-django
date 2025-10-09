@@ -132,8 +132,8 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Le disk Render doit être monté sur /media
 # (dans le Dashboard Render → onglet “Disks” → Mount Path = /media)
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.environ.get('MEDIA_ROOT', '/opt/render/project/src/media')
+#MEDIA_URL = '/media/'
+#MEDIA_ROOT = os.environ.get('MEDIA_ROOT', '/opt/render/project/src/media')
 
 # -------------------------------------------------------------------
 # DEFAULT PRIMARY KEY
