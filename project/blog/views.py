@@ -22,7 +22,6 @@ def index(request):
     posts = Post.objects.filter(is_published=True).order_by('-created_at')
     return render(request, 'blog/index.html', {'posts': posts})
 
-
 def post(request):
     posts_list = Post.objects.filter(is_published=True).order_by('-created_at')
     paginator = Paginator(posts_list, 9)
@@ -37,8 +36,7 @@ def post(request):
     except:
         posts = paginator.page(1)
 
-    return render(request, 'blog/post.html', {'posts': posts})
-
+    return render(request, 'blog/post.html', {'posts':posts})
 
 def single_post(request, id):
     post = get_object_or_404(Post, id=id)
@@ -56,7 +54,6 @@ def single_post(request, id):
         form = CommentForm()
     return render(request, 'blog/single-post.html', {'post': post, 'comments': comments, 'form': form})
 
-
 def contact(request):
     if request.method == 'POST':
         form = ContactForm(request.POST, request.FILES)
@@ -66,8 +63,7 @@ def contact(request):
             return redirect('blog-contact')
     else:
         form = ContactForm()
-    return render(request, 'blog/contact.html', {'form': form})
-
+    return render(request, 'blog/contact.html',{'form':form})
 
 @login_required
 def dashboard(request):
@@ -109,79 +105,38 @@ def dashboard(request):
 @login_required
 def dashboard_view_post(request, id):
     post = get_object_or_404(Post, id=id)
-    return render(request, 'blog/dashboard/dashboard-view-post.html', {'post': post})
+    return render(request, 'blog/dashboard/dashboard-view-post.html', {'post':post})
 
 
 @login_required
 def dashboard_new_post(request):
-    # ==================== DEBUG MODE ====================
-    from django.conf import settings
-    import sys
-
-    print("\n" + "=" * 60)
-    print("🔧 CLOUDINARY DEBUG INFO")
-    print("=" * 60)
-    print(f"📦 DEFAULT_FILE_STORAGE: {settings.DEFAULT_FILE_STORAGE}")
-    print(f"🔑 CLOUDINARY_URL exists: {bool(getattr(settings, 'CLOUDINARY_URL', None))}")
-    print(f"🔑 CLOUDINARY_URL value: {getattr(settings, 'CLOUDINARY_URL', 'NOT SET')[:50]}...")
-
-    # Vérifier si cloudinary_storage est chargé
-    print(f"📚 Apps installées contenant 'cloudinary':")
-    for app in settings.INSTALLED_APPS:
-        if 'cloudinary' in app.lower():
-            print(f"   - {app}")
-
-    # Vérifier l'ordre
-    try:
-        cs_index = settings.INSTALLED_APPS.index('cloudinary_storage')
-        sf_index = settings.INSTALLED_APPS.index('django.contrib.staticfiles')
-        c_index = settings.INSTALLED_APPS.index('cloudinary')
-        print(f"\n📊 Ordre des apps:")
-        print(f"   cloudinary_storage à l'index: {cs_index}")
-        print(f"   staticfiles à l'index: {sf_index}")
-        print(f"   cloudinary à l'index: {c_index}")
-        print(f"   ✅ Ordre correct!" if cs_index < sf_index < c_index else "   ❌ ORDRE INCORRECT!")
-    except ValueError as e:
-        print(f"   ❌ ERREUR: Une app est manquante - {e}")
-
-    print("=" * 60 + "\n")
-    # ==================== FIN DEBUG ====================
-
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
             post = form.save(commit=False)
-            post.author = request.user
+            users = User.objects.all()
+            if users.exists():
+                post.author = request.user
+
             post.save()
-
-            # ==================== DEBUG POST-SAVE ====================
-            if post.image:
-                print("\n" + "=" * 60)
-                print("🖼️  IMAGE SAVED INFO")
-                print("=" * 60)
-                print(f"📁 Image name: {post.image.name}")
-                print(f"🔗 Image URL: {post.image.url}")
-                print(f"💾 Storage class: {post.image.storage.__class__.__name__}")
-                print(f"📦 Storage module: {post.image.storage.__class__.__module__}")
-                print("=" * 60 + "\n")
-            # ==================== FIN DEBUG POST-SAVE ====================
-
             messages.success(request, 'Votre article a été enregistré.')
             return redirect('blog-dashboard')
     else:
         form = PostForm()
-    return render(request, 'blog/dashboard/dashboard-new-post.html', {'form': form})
+    return render(request, 'blog/dashboard/dashboard-new-post.html', {'form':form})
 
 
 @login_required
 def dashboard_edit_post(request, id):
     post = get_object_or_404(Post, id=id)
-    old_image = post.image.path if post.image else None
+    old_image = post.image.path # garder l'ancienne image
 
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
+            # Vérifie si une nouvelle image est uploadée
             if 'image' in request.FILES:
+                # Supprimer l'ancienne seulement si elle existe
                 if old_image and os.path.exists(old_image):
                     os.remove(old_image)
 
@@ -212,7 +167,6 @@ def dashboard_delete_post(request, id):
         else:
             messages.error(request, "Suppression impossible, veuillez recommencer.")
     return redirect('blog-dashboard')
-
 
 @login_required
 def dashboard_edit_profil(request):
