@@ -104,11 +104,9 @@ def dashboard(request):
 
 @login_required
 def dashboard_view_post(request, id):
-    try:
-        post = get_object_or_404(Post, id=id)
-        return render(request, 'blog/dashboard/dashboard-view-post.html', {'post':post})
-    except Exception as e:
-        print(e)
+    post = get_object_or_404(Post, id=id)
+    return render(request, 'blog/dashboard/dashboard-view-post.html', {'post':post})
+
 
 @login_required
 def dashboard_new_post(request):
@@ -130,27 +128,25 @@ def dashboard_new_post(request):
 
 @login_required
 def dashboard_edit_post(request, id):
-    try:
-        post = get_object_or_404(Post, id=id)
-        old_image = post.image.path if post.image else None  # garder l'ancienne image
+    post = get_object_or_404(Post, id=id)
+    old_image = post.image.path if post.image else None  # garder l'ancienne image
 
-        if request.method == 'POST':
-            form = PostForm(request.POST, request.FILES, instance=post)
-            if form.is_valid():
+    if request.method == 'POST':
+        form = PostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
             # Vérifie si une nouvelle image est uploadée
-                if 'image' in request.FILES:
+            if 'image' in request.FILES:
                 # Supprimer l'ancienne seulement si elle existe
-                    if old_image and os.path.exists(old_image):
-                        os.remove(old_image)
+                if old_image and os.path.exists(old_image):
+                    os.remove(old_image)
 
-                form.save()
-                messages.success(request, "Votre article a été modifié.")
-                return redirect('blog-dashboard')
-        else:
-            form = PostForm(instance=post)
-        return render(request, 'blog/dashboard/dashboard-edit-post.html', {'form': form, 'post': post})
-    except Exception as e:
-        print(e)
+            form.save()
+            messages.success(request, "Votre article a été modifié.")
+            return redirect('blog-dashboard')
+    else:
+        form = PostForm(instance=post)
+    return render(request, 'blog/dashboard/dashboard-edit-post.html', {'form': form, 'post': post})
+
 
 @login_required
 def dashboard_delete_post(request, id):
