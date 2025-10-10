@@ -162,9 +162,13 @@ def dashboard_edit_post(request, id):
     if request.method == 'POST':
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
-            # Si une nouvelle image est uploadée, supprime l'ancienne de Cloudinary
+            # Si une nouvelle image est uploadée, tente de supprimer l'ancienne
             if 'image' in request.FILES and post.image:
-                post.image.delete(save=False)
+                try:
+                    post.image.delete(save=False)
+                except Exception as e:
+                    # Ignore l'erreur si l'ancienne image n'existe pas
+                    print(f"⚠️ Impossible de supprimer l'ancienne image: {e}")
 
             form.save()
             messages.success(request, "Votre article a été modifié.")
@@ -177,7 +181,6 @@ def dashboard_edit_post(request, id):
         'blog/dashboard/dashboard-edit-post.html',
         {'form': form, 'post': post},
     )
-
 
 @login_required
 def dashboard_delete_post(request, id):
