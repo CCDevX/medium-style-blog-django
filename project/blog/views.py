@@ -139,6 +139,14 @@ def dashboard_new_post(request):
             post = form.save(commit=False)
             post.author = request.user
             post.save()
+
+            # 🔍 DEBUG
+            if post.image:
+                print(f"✅ Image uploadée!")
+                print(f"📁 URL: {post.image.url}")
+            else:
+                print(f"❌ Pas d'image uploadée")
+
             messages.success(request, 'Votre article a été enregistré.')
             return redirect('blog-dashboard')
     else:
