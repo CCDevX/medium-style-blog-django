@@ -37,19 +37,31 @@ ALLOWED_HOSTS = os.getenv(
 # CLOUDINARY – CONFIGURATION
 # -------------------------------------------------------------------
 
-CLOUDINARY_URL = os.getenv("CLOUDINARY_URL")
+CLOUDINARY_URL = os.getenv('CLOUDINARY_URL')
 if not CLOUDINARY_URL:
     raise ImproperlyConfigured(
-        "⚠️ CLOUDINARY_URL manquante dans les variables d'environnement"
+        "⚠️  La variable CLOUDINARY_URL est manquante."
     )
 
-# Configuration Cloudinary (SDK officiel)
-cloudinary.config(
-    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.getenv("CLOUDINARY_API_KEY"),
-    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
-    secure=True,
-)
+# ✅ Configuration explicite avec toutes les valeurs extraites
+# Format CLOUDINARY_URL : cloudinary://api_key:api_secret@cloud_name
+import re
+
+match = re.match(r'cloudinary://(\d+):([^@]+)@(.+)', CLOUDINARY_URL)
+if match:
+    api_key, api_secret, cloud_name = match.groups()
+
+    cloudinary.config(
+        cloud_name=cloud_name,
+        api_key=api_key,
+        api_secret=api_secret,
+        secure=True
+    )
+else:
+    raise ImproperlyConfigured("Format CLOUDINARY_URL invalide")
+
+# Utilise Cloudinary pour tous les fichiers uploadés
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # -------------------------------------------------------------------
 # APPLICATIONS
