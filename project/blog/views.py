@@ -134,20 +134,33 @@ def dashboard_view_post(request, id):
 @login_required
 def dashboard_new_post(request):
     if request.method == 'POST':
-        form = PostForm(request.POST, request.FILES)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.save()
+        try:
+            form = PostForm(request.POST, request.FILES)
+            if form.is_valid():
+                post = form.save(commit=False)
+                post.author = request.user
+                post.save()
 
-            # 🔍 DEBUG
-            if post.image:
-                print(f"✅ Image uploadée!")
-                print(f"📁 URL: {post.image.url}")
+                # Gestion des tags ManyToMany
+                form.save_m2m()
+
+                # Debug
+                if post.image:
+                    try:
+                        print(f"✅ Image uploadée!")
+                        print(f"📁 URL: {post.image.url}")
+                    except Exception as e:
+                        print(f"⚠️ Erreur lecture URL image: {e}")
+                else:
+                    print(f"❌ Pas d'image uploadée")
+
+                messages.success(request, 'Votre article a été enregistré.')
+                return redirect('blog-dashboard')
             else:
-                print(f"❌ Pas d'image uploadée")
-
-            messages.success(request, 'Votre article a été enregistré.')
+                messages.error(request, 'Erreur dans le formulaire. Vérifiez les champs.')
+        except Exception as e:
+            print(f"❌ Erreur création post: {e}")
+            messages.error(request, f'Une erreur est survenue lors de la création de l\'article.')
             return redirect('blog-dashboard')
     else:
         form = PostForm()
@@ -159,19 +172,34 @@ def dashboard_new_post(request):
 def dashboard_edit_post(request, id):
     post = get_object_or_404(Post, id=id)
 
-    if request.method == 'POST':
-        form = PostForm(request.POST, request.FILES, instance=post)
-        if form.is_valid():
-            # Si une nouvelle image est uploadée, tente de supprimer l'ancienne
-            if 'image' in request.FILES and post.image:
-                try:
-                    post.image.delete(save=False)
-                except Exception as e:
-                    # Ignore l'erreur si l'ancienne image n'existe pas
-                    print(f"⚠️ Impossible de supprimer l'ancienne image: {e}")
+    # Sauvegarder l'ancienne image AVANT le traitement du formulaire
+    old_image = None
+    try:
+        if post.image:
+            old_image = post.image
+    except Exception as e:
+        print(f"⚠️ Erreur lecture ancienne image: {e}")
 
-            form.save()
-            messages.success(request, "Votre article a été modifié.")
+    if request.method == 'POST':
+        try:
+            form = PostForm(request.POST, request.FILES, instance=post)
+            if form.is_valid():
+                # Si une nouvelle image est uploadée, supprimer l'ancienne de Cloudinary
+                if 'image' in request.FILES and old_image:
+                    try:
+                        old_image.delete(save=False)
+                        print("✅ Ancienne image supprimée de Cloudinary")
+                    except Exception as e:
+                        print(f"⚠️ Impossible de supprimer l'ancienne image: {e}")
+
+                form.save()
+                messages.success(request, "Votre article a été modifié.")
+                return redirect('blog-dashboard')
+            else:
+                messages.error(request, 'Erreur dans le formulaire. Vérifiez les champs.')
+        except Exception as e:
+            print(f"❌ Erreur modification post: {e}")
+            messages.error(request, f'Une erreur est survenue lors de la modification.')
             return redirect('blog-dashboard')
     else:
         form = PostForm(instance=post)
@@ -182,6 +210,7 @@ def dashboard_edit_post(request, id):
         {'form': form, 'post': post},
     )
 
+
 @login_required
 def dashboard_delete_post(request, id):
     post = get_object_or_404(Post, id=id)
@@ -191,10 +220,21 @@ def dashboard_delete_post(request, id):
         return redirect('blog-home')
 
     if request.method == 'POST':
-        if post.image:
-            post.image.delete(save=False)
-        post.delete()
-        messages.success(request, "Votre article a été supprimé.")
+        try:
+            # Supprimer l'image de Cloudinary si elle existe
+            if post.image:
+                try:
+                    post.image.delete(save=False)
+                    print("✅ Image supprimée de Cloudinary")
+                except Exception as e:
+                    print(f"⚠️ Impossible de supprimer l'image: {e}")
+
+            post.delete()
+            messages.success(request, "Votre article a été supprimé.")
+        except Exception as e:
+            print(f"❌ Erreur suppression post: {e}")
+            messages.error(request, "Une erreur est survenue lors de la suppression.")
+
         return redirect('blog-dashboard')
 
     return redirect('blog-dashboard')
@@ -205,10 +245,17 @@ def dashboard_edit_profil(request):
     profile = Profile.objects.get(user=request.user)
 
     if request.method == 'POST':
-        form = ProfileForm(request.POST, instance=profile)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Votre profil a été modifié avec succès.")
+        try:
+            form = ProfileForm(request.POST, instance=profile)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Votre profil a été modifié avec succès.")
+                return redirect('blog-dashboard')
+            else:
+                messages.error(request, 'Erreur dans le formulaire. Vérifiez les champs.')
+        except Exception as e:
+            print(f"❌ Erreur modification profil: {e}")
+            messages.error(request, "Une erreur est survenue lors de la modification du profil.")
             return redirect('blog-dashboard')
     else:
         form = ProfileForm(instance=profile)
@@ -218,8 +265,6 @@ def dashboard_edit_profil(request):
         "blog/dashboard/dashboard-edit-profile.html",
         {'form': form},
     )
-
-
 '''
 import os
 
