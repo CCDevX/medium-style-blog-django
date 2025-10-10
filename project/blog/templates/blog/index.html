@@ -30,7 +30,7 @@
     <div class="row mb-5 pb-5 border-bottom">
         <div class="col-lg-7 mb-4 mb-lg-0">
             <a href="{% url 'blog-single-post' posts.0.id %}" class="text-decoration-none">
-                {% if posts.0.image.name %}
+                {% if posts.0.image.url %}
                     <img src="{{ posts.0.image.url }}" class="img-fluid rounded w-100" style="object-fit: cover; height: 500px;" alt="{{ posts.0.title }}">
                 {% else %}
                     <div class="bg-light rounded w-100 d-flex align-items-center justify-content-center" style="height: 500px;">
@@ -83,7 +83,7 @@
             <div class="col-md-6 col-lg-4">
                 <article class="h-100">
                     <a href="{% url 'blog-single-post' post.id %}" class="text-decoration-none">
-                        {% if post.image.name %}
+                        {% if post.image.url %}
                             <img src="{{ post.image.url }}" class="img-fluid rounded w-100 mb-3" style="object-fit: cover; height: 250px;" alt="{{ post.title }}">
                         {% else %}
                             <div class="bg-light rounded w-100 d-flex align-items-center justify-content-center mb-3" style="height: 250px;">
