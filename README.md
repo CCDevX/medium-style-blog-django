@@ -251,10 +251,6 @@ Access the Django admin at `/admin/` to manage:
 
 This project is open source and available under the MIT License.
 
-## Contact
-
-For questions or suggestions, please use the contact form on the website or open an issue on GitHub.
-
 ---
 
 **Note**: Make sure to never commit your `.env` file or expose sensitive credentials in your repository.
