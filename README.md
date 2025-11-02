@@ -2,8 +2,6 @@
 
 A modern and elegant blog platform inspired by Medium, built with Django. Plume provides an intuitive platform for sharing ideas, stories, and reflections.
 
-**Live Demo**: [https://medium-style-blog-django.onrender.com/](https://medium-style-blog-django.onrender.com/)
-
 ## Features
 
 ### For Visitors
